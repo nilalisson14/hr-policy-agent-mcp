@@ -17,11 +17,6 @@ discovery, schema e invocação.
 
 ## Arquitetura
 
-```
-## Arquitetura (com Mermaid)
-
-Copie o diagrama abaixo no README.md (após a seção de Arquitetura):
-
 ```mermaid
 graph TB
     subgraph Cliente["🌐 Cliente"]
