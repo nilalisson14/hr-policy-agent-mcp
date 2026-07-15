@@ -14,7 +14,7 @@ from pathlib import Path
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import Chroma
-from langchain.schema import Document
+from langchain_core.documents import Document
 
 DATA_PATH = Path(__file__).parent.parent / "data" / "politicas_rh.md"
 PERSIST_DIR = Path(__file__).parent.parent / "chroma_db"
@@ -51,7 +51,7 @@ def build_index() -> None:
     print(f"[ingest] {len(documents)} políticas extraídas do corpus.")
 
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/text-embedding-004",
+        model="models/gemini-embedding-001",
         google_api_key=os.environ["GOOGLE_API_KEY"],
     )
 

@@ -31,7 +31,7 @@ Pergunta: {question}
 class PolicyQueryEngine:
     def __init__(self) -> None:
         embeddings = GoogleGenerativeAIEmbeddings(
-            model="models/text-embedding-004",
+            model="models/gemini-embedding-001",
             google_api_key=os.environ["GOOGLE_API_KEY"],
         )
         self.vectorstore = Chroma(
@@ -40,7 +40,7 @@ class PolicyQueryEngine:
             collection_name="politicas_rh",
         )
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             google_api_key=os.environ["GOOGLE_API_KEY"],
             temperature=0,
         )
