@@ -18,11 +18,84 @@ discovery, schema e invocação.
 ## Arquitetura
 
 ```
-data/politicas_rh.md      → corpus sintético de políticas de RH
-src/ingest.py              → parseia o corpus e gera embeddings (Gemini) no ChromaDB
-src/query_engine.py        → lógica de RAG (retrieval + geração), isolada do MCP
-src/mcp_server.py          → servidor MCP que expõe query_engine como tools
-tests/test_query_engine_manual.py → teste manual do RAG sem precisar do MCP
+## Arquitetura (com Mermaid)
+
+Copie o diagrama abaixo no README.md (após a seção de Arquitetura):
+
+```mermaid
+graph TB
+    subgraph Cliente["🌐 Cliente"]
+        PHP["PHP Site<br/>nilalisson.com.br/agente-rh.php"]
+        Browser["Navegador"]
+    end
+
+    subgraph VPS["☁️ VPS Oracle Linux"]
+        subgraph Network["Camada de Rede"]
+            Firewall["Firewall<br/>(iptables: portas 80/443)"]
+            Nginx["🔒 Nginx<br/>api.nilalisson.com.br"]
+        end
+
+        subgraph App["Aplicação"]
+            FastAPI["⚡ FastAPI<br/>POST /consultar<br/>GET /health"]
+            Systemd["systemd<br/>hr-policy-agent.service"]
+        end
+
+        subgraph Engine["Motor de Consulta"]
+            QueryEngine["PolicyQueryEngine<br/>(LangChain)"]
+            ChromaDB["📊 ChromaDB<br/>Vector Store"]
+        end
+
+        subgraph Corpus["Dados"]
+            Policies["5 Políticas RH<br/>(férias, licença,<br/>afastamento, benefícios,<br/>home office)"]
+        end
+    end
+
+    subgraph External["🌍 Serviços Externos"]
+        Gemini["Gemini API<br/>Chat: 2.5-flash<br/>Embeddings: 001"]
+    end
+
+    PHP -->|POST JSON| Nginx
+    Browser -->|HTTP/HTTPS| Nginx
+    Firewall -->|permite 80/443| Nginx
+    Nginx -->|proxy_pass| FastAPI
+    Systemd -->|gerencia| FastAPI
+    FastAPI -->|invoca| QueryEngine
+    QueryEngine -->|consulta| ChromaDB
+    ChromaDB -->|busca vetorial| Policies
+    QueryEngine -->|LLM| Gemini
+    Gemini -->|resposta| QueryEngine
+    QueryEngine -->|JSON| FastAPI
+    FastAPI -->|JSON response| Nginx
+    Nginx -->|HTTP 200| PHP
+    PHP -->|renderiza| Browser
+
+    style Client fill:#e1f5ff
+    style VPS fill:#f3e5f5
+    style Network fill:#fff3e0
+    style App fill:#e8f5e9
+    style Engine fill:#fce4ec
+    style Corpus fill:#f1f8e9
+    style External fill:#ede7f6
+```
+
+Esse diagrama mostra:
+- **Cliente** (seu site PHP)
+- **Camada de rede** (firewall + nginx com HTTPS)
+- **Aplicação** (FastAPI + systemd)
+- **Motor** (QueryEngine + ChromaDB)
+- **Dados** (corpus de políticas)
+- **Integração externa** (Gemini API)
+- **Fluxo completo** de request → response
+
+---
+
+### Como adicionar ao README:
+
+No seu arquivo `README.md` local, procure a seção **"## Arquitetura"** (onde está o ASCII art antigo) e **substitua** por esse bloco Mermaid acima (entre os ```mermaid e ```).
+
+Depois faz o commit: `"docs: adicionar diagrama Mermaid da arquitetura"`
+
+GitHub vai renderizar automaticamente quando você abrir o README no navegador.P
 ```
 
 O `query_engine.py` foi deliberadamente separado do `mcp_server.py`: isso
